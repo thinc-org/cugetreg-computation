@@ -6,6 +6,12 @@ on:
 
 jobs:
   deploy:
+    strategy:
+      matrix:
+        node-version: [14.x]
+        platform: [ubuntu-latest]
+
+    runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v2
 
