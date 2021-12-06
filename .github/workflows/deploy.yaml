@@ -6,7 +6,7 @@ on:
 
 permissions:
   packages: write
-  repository-projects: read
+  contents: read
 
 jobs:
   deploy:
