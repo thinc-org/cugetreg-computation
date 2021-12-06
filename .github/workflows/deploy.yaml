@@ -68,5 +68,5 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            docker pull ghcr.io/thinc-org/cugetreg/cugetreg-computation:latest
+            docker pull ghcr.io/thinc-org/cugetreg-computation:latest
             docker-compose up -d 
