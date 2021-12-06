@@ -4,6 +4,9 @@ on:
   push:
     branches: [master]
 
+permissions:
+  packages: write
+
 jobs:
   deploy:
     strategy:
