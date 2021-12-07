@@ -57,7 +57,7 @@ class CourseRecommendationModel:
             order by `timestamp` desc
             )
             where `message` like 'user add course'
-            limit 30000
+            limit 3000000
             )
             """
     
