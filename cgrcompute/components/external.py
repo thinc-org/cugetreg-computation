@@ -79,11 +79,12 @@ class MongoService:
         dbname = cfg['database']
         self.db = MongoClient(url)[dbname]
 
-    def get_course_abbr(self, course_no, semester, study_program):
+    def get_course_abbr(self, course_no, semester, study_program, academic_year):
         c = self.db['courses'].find_one({
                 'courseNo': course_no,
                 'semester': semester,
-                'studyProgram': study_program
+                'studyProgram': study_program,
+                'academicYear': academic_year
             })
         if c:
             return c['abbrName']

@@ -46,11 +46,12 @@ class MongoServiceTest(unittest.TestCase):
         self.db['courses'].find_one.return_value = {
                 'abbrName': 'THAI WRIT WORK'
         }
-        self.assertEqual('THAI WRIT WORK', self.srv.get_course_abbr(course_no = '0123105', semester = '1', study_program = 'S'))
+        self.assertEqual('THAI WRIT WORK', self.srv.get_course_abbr(course_no = '0123105', semester = '1', study_program = 'S', academic_year='2564'))
         self.db['courses'].find_one.assert_called_with({
                 'courseNo': '0123105',
                 'semester': '1',
-                'studyProgram': 'S'
+                'studyProgram': 'S',
+                'academicYear': '2564'
             })
 
 if __name__ == '__main__':

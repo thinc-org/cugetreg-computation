@@ -67,7 +67,7 @@ class CourseRecommendationModel:
     def infer(self, selected_courses):
         res = self.model.infer(selected_courses)
         res = sorted(res.items(), key=lambda x:-x[1])
-        return [course for course, score in res]
+        return [course for course, score in res][:300]
     
     def downloadobsvdata(self, drill: DrillClient):
         self.logger.info('Download observation')
@@ -108,7 +108,7 @@ def recommend_course(req: grpcmsg.CourseRecommendationRequest, cache: SharableCa
     for study_program, course_no in res:
         if len(enriched_res) > 10:
             break
-        abbr = mongo.get_course_abbr(course_no=course_no, study_program=req.semesterKey.studyProgram, semester=req.semesterKey.semester)
+        abbr = mongo.get_course_abbr(course_no=course_no, study_program=req.semesterKey.studyProgram, semester=req.semesterKey.semester, academic_year=req.semesterKey.academicYear)
         if abbr:
             d = grpcmsg.CourseRecommendationResponse.CourseDetail()
             d.key.courseNo = course_no
