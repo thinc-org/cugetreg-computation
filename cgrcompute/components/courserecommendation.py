@@ -108,6 +108,9 @@ def recommend_course(req: grpcmsg.CourseRecommendationRequest, cache: SharableCa
     for study_program, course_no in res:
         if len(enriched_res) > 10:
             break
+        if course_no in [e.courseNo for e in req.selectedCourse]:
+            continue
+
         abbr = mongo.get_course_abbr(course_no=course_no, study_program=req.semesterKey.studyProgram, semester=req.semesterKey.semester, academic_year=req.semesterKey.academicYear)
         if abbr:
             d = grpcmsg.CourseRecommendationResponse.CourseDetail()

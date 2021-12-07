@@ -126,6 +126,18 @@ class RecommendCourseTest(unittest.TestCase):
         res = recommend_course(req, self.cache)
         self.assertEqual(res.course[0].key.courseNo, '1g')
 
+    def test_no_already_selected(self):
+        req = grpcmsg.CourseRecommendationRequest()
+        req.variant = 'COSINE'
+        req.semesterKey.studyProgram = 'T'
+        req.semesterKey.semester = '0'
+        req.semesterKey.academicYear = 'Y'
+        c = req.selectedCourse.add()
+        c.courseNo = '1g'
+        c.semesterKey.CopyFrom(req.semesterKey)
+        res = recommend_course(req, self.cache)
+        self.assertEqual(res.course[0].key.courseNo, '2g')
+
     def test_infer_fitered(self):
         req = grpcmsg.CourseRecommendationRequest()
         req.variant = 'COSINE'
