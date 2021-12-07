@@ -7,4 +7,7 @@ generate-grpc:
 test:
 	python -m unittest discover -s tests
 
-.PHONY: init generate-grpc
+run:
+	python -m cgrcompute.server
+
+.PHONY: init generate-grpc test run
