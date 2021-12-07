@@ -45,15 +45,20 @@ class CosineSimRecommendationModel:
 
 class CourseRecommendationModel:
 
+    # This query looks weird but it's hand-optimized.
     OBSV_QUERY = """
-            select t.`a_studyProgram`, t.`a_courseNo`, t.`session_id` from
+            select `a_courseNo`, `a_studyProgram`, `device_id`
+            from
             (
-                select g.`a_studyProgram`, g.`a_courseNo`, g.`session_id`, g.`message`
-                from elastic.`graylog_0` g 
-                order by g.`timestamp` desc
-                limit 100000
-                ) t
-            where  t.`message` like 'user add course'
+            select `message`, `a_courseNo`, `a_studyProgram`, `device_id`
+            from (select `message`, `a_courseNo`, `a_studyProgram`, `device_id`
+            from elastic.`graylog_0`
+            where `a_courseNo` <> 'null'
+            order by `timestamp` desc
+            )
+            where `message` like 'user add course'
+            limit 30000
+            )
             """
     
     def __init__(self):
@@ -77,9 +82,9 @@ class CourseRecommendationModel:
         for e in data.rows:
             el = (e['a_studyProgram'], e['a_courseNo'])
             try:
-                obsv[e['session_id']].add(el)
+                obsv[e['device_id']].add(el)
             except KeyError:
-                obsv[e['session_id']] = set([el])
+                obsv[e['device_id']] = set([el])
         obsv = [l for _, l in obsv.items() if len(l) > 4]
         self.logger.info('Retrieved {} qualified observation'.format(len(obsv)))
         return obsv

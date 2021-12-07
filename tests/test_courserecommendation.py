@@ -55,7 +55,7 @@ class CourseRecommendationModelTest(unittest.TestCase):
                     {
                         'a_studyProgram': 'S',
                         'a_courseNo': str(i),
-                        'session_id': str(j)
+                        'device_id': str(j)
                     }
                     for j in range(3)
                     for i in range(5)
