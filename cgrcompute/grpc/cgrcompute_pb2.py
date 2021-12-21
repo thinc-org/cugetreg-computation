@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10\x63grcompute.proto\"K\n\x0bSemesterKey\x12\x14\n\x0cstudyProgram\x18\x01 \x01(\t\x12\x10\n\x08semester\x18\x02 \x01(\t\x12\x14\n\x0c\x61\x63\x61\x64\x65micYear\x18\x03 \x01(\t\"@\n\tCourseKey\x12\x10\n\x08\x63ourseNo\x18\x01 \x01(\t\x12!\n\x0bsemesterKey\x18\x02 \x01(\x0b\x32\x0c.SemesterKey\"u\n\x1b\x43ourseRecommendationRequest\x12\x0f\n\x07variant\x18\x01 \x01(\t\x12!\n\x0bsemesterKey\x18\x02 \x01(\x0b\x32\x0c.SemesterKey\x12\"\n\x0eselectedCourse\x18\x03 \x03(\x0b\x32\n.CourseKey\"\x99\x01\n\x1c\x43ourseRecommendationResponse\x12:\n\x06\x63ourse\x18\x02 \x03(\x0b\x32*.CourseRecommendationResponse.CourseDetail\x1a=\n\x0c\x43ourseDetail\x12\x17\n\x03key\x18\x01 \x01(\x0b\x32\n.CourseKey\x12\x14\n\x0c\x63ourseNameEn\x18\x02 \x01(\t2b\n\x14\x43ourseRecommendation\x12J\n\tRecommend\x12\x1c.CourseRecommendationRequest\x1a\x1d.CourseRecommendationResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x10\x63grcompute.proto\"K\n\x0bSemesterKey\x12\x14\n\x0cstudyProgram\x18\x01 \x01(\t\x12\x10\n\x08semester\x18\x02 \x01(\t\x12\x14\n\x0c\x61\x63\x61\x64\x65micYear\x18\x03 \x01(\t\"@\n\tCourseKey\x12\x10\n\x08\x63ourseNo\x18\x01 \x01(\t\x12!\n\x0bsemesterKey\x18\x02 \x01(\x0b\x32\x0c.SemesterKey\"v\n\x1b\x43ourseRecommendationRequest\x12\x0f\n\x07variant\x18\x01 \x01(\t\x12!\n\x0bsemesterKey\x18\x02 \x01(\x0b\x32\x0c.SemesterKey\x12#\n\x0fselectedCourses\x18\x03 \x03(\x0b\x32\n.CourseKey\"\x9a\x01\n\x1c\x43ourseRecommendationResponse\x12;\n\x07\x63ourses\x18\x02 \x03(\x0b\x32*.CourseRecommendationResponse.CourseDetail\x1a=\n\x0c\x43ourseDetail\x12\x17\n\x03key\x18\x01 \x01(\x0b\x32\n.CourseKey\x12\x14\n\x0c\x63ourseNameEn\x18\x02 \x01(\t2b\n\x14\x43ourseRecommendation\x12J\n\tRecommend\x12\x1c.CourseRecommendationRequest\x1a\x1d.CourseRecommendationResponse\"\x00\x62\x06proto3'
 )
 
 
@@ -133,7 +133,7 @@ _COURSERECOMMENDATIONREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='selectedCourse', full_name='CourseRecommendationRequest.selectedCourse', index=2,
+      name='selectedCourses', full_name='CourseRecommendationRequest.selectedCourses', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -152,7 +152,7 @@ _COURSERECOMMENDATIONREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=163,
-  serialized_end=280,
+  serialized_end=281,
 )
 
 
@@ -190,8 +190,8 @@ _COURSERECOMMENDATIONRESPONSE_COURSEDETAIL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=375,
-  serialized_end=436,
+  serialized_start=377,
+  serialized_end=438,
 )
 
 _COURSERECOMMENDATIONRESPONSE = _descriptor.Descriptor(
@@ -203,7 +203,7 @@ _COURSERECOMMENDATIONRESPONSE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='course', full_name='CourseRecommendationResponse.course', index=0,
+      name='courses', full_name='CourseRecommendationResponse.courses', index=0,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -221,16 +221,16 @@ _COURSERECOMMENDATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=283,
-  serialized_end=436,
+  serialized_start=284,
+  serialized_end=438,
 )
 
 _COURSEKEY.fields_by_name['semesterKey'].message_type = _SEMESTERKEY
 _COURSERECOMMENDATIONREQUEST.fields_by_name['semesterKey'].message_type = _SEMESTERKEY
-_COURSERECOMMENDATIONREQUEST.fields_by_name['selectedCourse'].message_type = _COURSEKEY
+_COURSERECOMMENDATIONREQUEST.fields_by_name['selectedCourses'].message_type = _COURSEKEY
 _COURSERECOMMENDATIONRESPONSE_COURSEDETAIL.fields_by_name['key'].message_type = _COURSEKEY
 _COURSERECOMMENDATIONRESPONSE_COURSEDETAIL.containing_type = _COURSERECOMMENDATIONRESPONSE
-_COURSERECOMMENDATIONRESPONSE.fields_by_name['course'].message_type = _COURSERECOMMENDATIONRESPONSE_COURSEDETAIL
+_COURSERECOMMENDATIONRESPONSE.fields_by_name['courses'].message_type = _COURSERECOMMENDATIONRESPONSE_COURSEDETAIL
 DESCRIPTOR.message_types_by_name['SemesterKey'] = _SEMESTERKEY
 DESCRIPTOR.message_types_by_name['CourseKey'] = _COURSEKEY
 DESCRIPTOR.message_types_by_name['CourseRecommendationRequest'] = _COURSERECOMMENDATIONREQUEST
@@ -282,8 +282,8 @@ _COURSERECOMMENDATION = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=438,
-  serialized_end=536,
+  serialized_start=440,
+  serialized_end=538,
   methods=[
   _descriptor.MethodDescriptor(
     name='Recommend',

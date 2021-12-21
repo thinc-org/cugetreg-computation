@@ -105,7 +105,7 @@ def recommend_course(req: grpcmsg.CourseRecommendationRequest, cache: SharableCa
     if req.variant == 'RANDOM':
         res = model.random_infer()
     elif req.variant == 'COSINE':
-        res = model.infer([(e.semesterKey.studyProgram, e.courseNo) for e in req.selectedCourse])
+        res = model.infer([(e.semesterKey.studyProgram, e.courseNo) for e in req.selectedCourses])
     else:
         raise Exception('{} variant is invalid'.format(req.variant))
     enriched_res = []
@@ -113,7 +113,7 @@ def recommend_course(req: grpcmsg.CourseRecommendationRequest, cache: SharableCa
     for study_program, course_no in res:
         if len(enriched_res) > 10:
             break
-        if course_no in [e.courseNo for e in req.selectedCourse]:
+        if course_no in [e.courseNo for e in req.selectedCourses]:
             continue
 
         abbr = mongo.get_course_abbr(course_no=course_no, study_program=req.semesterKey.studyProgram, semester=req.semesterKey.semester, academic_year=req.semesterKey.academicYear)
@@ -124,7 +124,7 @@ def recommend_course(req: grpcmsg.CourseRecommendationRequest, cache: SharableCa
             d.courseNameEn = abbr
             enriched_res.append(d)
     resp = grpcmsg.CourseRecommendationResponse()
-    resp.course.extend(enriched_res)
+    resp.courses.extend(enriched_res)
     return resp
 
 def recommend_course_serialized(req: bytes, cache: SharableCache) -> bytes:

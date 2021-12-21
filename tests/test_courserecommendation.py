@@ -115,8 +115,8 @@ class RecommendCourseTest(unittest.TestCase):
         req.semesterKey.studyProgram = 'T'
         req.semesterKey.semester = '0'
         res = recommend_course(req, self.cache)
-        self.assertEqual(res.course[0].courseNameEn, 'HELLO')
-        self.assertEqual(res.course[0].key.courseNo, '1k')
+        self.assertEqual(res.courses[0].courseNameEn, 'HELLO')
+        self.assertEqual(res.courses[0].key.courseNo, '1k')
 
     def test_infer(self):
         req = grpcmsg.CourseRecommendationRequest()
@@ -124,7 +124,7 @@ class RecommendCourseTest(unittest.TestCase):
         req.semesterKey.studyProgram = 'T'
         req.semesterKey.semester = '0'
         res = recommend_course(req, self.cache)
-        self.assertEqual(res.course[0].key.courseNo, '1g')
+        self.assertEqual(res.courses[0].key.courseNo, '1g')
 
     def test_no_already_selected(self):
         req = grpcmsg.CourseRecommendationRequest()
@@ -132,11 +132,11 @@ class RecommendCourseTest(unittest.TestCase):
         req.semesterKey.studyProgram = 'T'
         req.semesterKey.semester = '0'
         req.semesterKey.academicYear = 'Y'
-        c = req.selectedCourse.add()
+        c = req.selectedCourses.add()
         c.courseNo = '1g'
         c.semesterKey.CopyFrom(req.semesterKey)
         res = recommend_course(req, self.cache)
-        self.assertEqual(res.course[0].key.courseNo, '2g')
+        self.assertEqual(res.courses[0].key.courseNo, '2g')
 
     def test_infer_fitered(self):
         req = grpcmsg.CourseRecommendationRequest()
@@ -145,9 +145,9 @@ class RecommendCourseTest(unittest.TestCase):
         req.semesterKey.semester = '0'
         self.mongo.return_value.get_course_abbr.side_effect = [None, 'TEST']
         res = recommend_course(req, self.cache)
-        self.assertEqual(res.course[0].courseNameEn, 'TEST')
-        self.assertEqual(res.course[0].key.courseNo, '2g')
-        self.assertEqual(len(res.course), 1)
+        self.assertEqual(res.courses[0].courseNameEn, 'TEST')
+        self.assertEqual(res.courses[0].key.courseNo, '2g')
+        self.assertEqual(len(res.courses), 1)
 
     def test_serialize(self):
         with patch('cgrcompute.components.courserecommendation.recommend_course') as p:
