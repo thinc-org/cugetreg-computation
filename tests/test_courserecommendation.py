@@ -152,10 +152,13 @@ class RecommendCourseTest(unittest.TestCase):
     def test_serialize(self):
         with patch('cgrcompute.components.courserecommendation.recommend_course') as p:
             p.return_value = grpcmsg.CourseRecommendationResponse()
+            c = p.return_value.courses.add()
+            c.courseNameEn = 'hello'
             req = grpcmsg.CourseRecommendationRequest()
             eres = recommend_course_serialized(req.SerializeToString(), None)
-            grpcmsg.CourseRecommendationResponse().ParseFromString(eres)
-
+            res = grpcmsg.CourseRecommendationResponse()
+            res.ParseFromString(eres)
+            self.assertEqual('hello', res.courses[0].courseNameEn)
 
 
 
