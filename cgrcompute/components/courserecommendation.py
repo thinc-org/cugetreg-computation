@@ -6,6 +6,7 @@ from logging import getLogger
 from cgrcompute.grpc import cgrcompute_pb2 as grpcmsg
 from cgrcompute.components.multiprocess import SharableCache
 import random
+import pickle
 
 class CosineSimRecommendationModel:
 
@@ -75,6 +76,7 @@ class CourseRecommendationModel:
         return [course for course, score in res][:300]
     
     def downloadobsvdata(self, drill: DrillClient):
+        """
         self.logger.info('Download observation')
         data = drill.query(self.OBSV_QUERY)
         self.logger.info('Received {} observations'.format(len(data.rows)))
@@ -87,6 +89,9 @@ class CourseRecommendationModel:
                 obsv[e['device_id']] = set([el])
         obsv = [l for _, l in obsv.items() if len(l) > 4]
         self.logger.info('Retrieved {} qualified observation'.format(len(obsv)))
+        """
+        with open("obsv.pickle", "rb") as f:
+            obsv = pickle.load(f)
         return obsv
 
     def random_infer(self):
@@ -94,8 +99,17 @@ class CourseRecommendationModel:
 
 def get_course_recommendation_model():
     model = CourseRecommendationModel()
-    model.populate(DrillClient())
+    # model.populate(DrillClient())
+    model.populate(None)
     return model
+
+def local_get_course_abbr(course_no, study_program, semester, academic_year):
+    with open("./coursemap.pickle", "rb") as f:
+        d = pickle.load(f)
+        try:
+            return d[tuple([course_no, study_program, semester, academic_year])]
+        except KeyError:
+            return None
 
 def recommend_course(req: grpcmsg.CourseRecommendationRequest, cache: SharableCache) -> grpcmsg.CourseRecommendationResponse:
     logger = getLogger('recommend_course')
@@ -109,14 +123,15 @@ def recommend_course(req: grpcmsg.CourseRecommendationRequest, cache: SharableCa
     else:
         raise Exception('{} variant is invalid'.format(req.variant))
     enriched_res = []
-    mongo = get_mongo_service()
+    # mongo = get_mongo_service()
     for study_program, course_no in res:
         if len(enriched_res) > 10:
             break
         if course_no in [e.courseNo for e in req.selectedCourses]:
             continue
 
-        abbr = mongo.get_course_abbr(course_no=course_no, study_program=req.semesterKey.studyProgram, semester=req.semesterKey.semester, academic_year=req.semesterKey.academicYear)
+        # abbr = mongo.get_course_abbr(course_no=course_no, study_program=req.semesterKey.studyProgram, semester=req.semesterKey.semester, academic_year=req.semesterKey.academicYear)
+        abbr = local_get_course_abbr(course_no=course_no, study_program=req.semesterKey.studyProgram, semester=req.semesterKey.semester, academic_year=req.semesterKey.academicYear)
         if abbr:
             d = grpcmsg.CourseRecommendationResponse.CourseDetail()
             d.key.courseNo = course_no
