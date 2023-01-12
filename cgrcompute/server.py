@@ -7,13 +7,14 @@ from cgrcompute.components.multiprocess import SharableCache
 from cgrcompute.components.courserecommendation import recommend_course_serialized
 from logging import getLogger
 import logging
+import time
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'grpc'))
 from cgrcompute.grpc import cgrcompute_pb2_grpc, cgrcompute_pb2
 
 POOL_SIZE = 4
 
-logging.basicConfig(level=logging.NOTSET)
+logging.basicConfig(level=logging.INFO)
 
 manager: Manager = None
 pool: ProcessPoolExecutor = None
@@ -26,10 +27,11 @@ class CourseRecommendationServicer(cgrcompute_pb2_grpc.CourseRecommendationServi
         self.logger = getLogger('CourseRecommendationServicer')
 
     def Recommend(self, request, context):
-        self.logger.info('Processing request {}'.format(request))
+        start = time.time()
+        self.logger.info("Processing Recommend")
         res =  cgrcompute_pb2.CourseRecommendationResponse()
         res.ParseFromString(pool.submit(recommend_course_serialized, request.SerializeToString(), self.cache).result())
-        self.logger.info('Result {}'.format(res))
+        self.logger.info("Processed Recommend took {} s".format(time.time() - start))
         return res
 
 def create_server():

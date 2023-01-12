@@ -5,70 +5,64 @@ import json
 from cgrcompute.components.config import get_config
 import typing
 from pymongo import MongoClient
-
-AUTH_COOKIE_NAME = 'authelia_session'
-
-class DrillQueryResult:
-    
-    columns: list[str]
-    rows: list[dict[str, typing.Any]]
-
-    def __init__(self, result):
-        self.columns = result['columns']
-        self.rows = result['rows']
-
-    def __repr__(self):
-        return json.dumps({
-                'columns': self.columns,
-                'rows': self.rows
-            })
-
-class DrillQueryException(Exception):
-
-    def __init__(self, msg):
-        super().__init__(self, msg)
+from opensearchpy import OpenSearch
 
 
-class DrillClient:
-    
+class ElasticService:
+
     def __init__(self):
-        self.logger = getLogger('DrillClient')
-        cfg = get_config()['drill']
-        self.url = cfg['url']
-        self.cookies = dict()
-        if 'auth_proxy' in cfg:
-            proxy = cfg['auth_proxy']
-            username = cfg['auth_username']
-            password = cfg['auth_password']
-            self.logger.info("auth_proxy detected, trying to authenticate")
-            resp = requests.post(proxy + '/api/firstfactor', json={
-                    'username': username,
-                    'password': password
-                })
-            resp.raise_for_status()
-            cookie = resp.cookies[AUTH_COOKIE_NAME]
-            self.logger.info('auth_proxy authenticated')
-            self.cookies = resp.cookies
-        self.checkstatus()
-        self.logger.info('drill connected')
+        cfg = get_config()['elastic']
+        self.client = OpenSearch(
+            hosts=[{'host': cfg['host'], 'port': cfg['port']}],
+            http_compress=True,
+            http_auth=(cfg['username'], cfg['password']),
+            use_ssl=True,
+            verify_certs=False,
+            ssl_show_warn=False,
+        )
 
-    
-    def checkstatus(self):
-        r = requests.get(self.url + '/profiles.json', cookies=self.cookies, allow_redirects=False)
-        if r.status_code != 200:
-            raise Exception('Drill status return is not 200')
-        r.raise_for_status()
-
-    def query(self, query) -> DrillQueryResult :
-        req = {
-            'queryType': 'SQL',
-            'query': query
+    def find_all_user_add_course(self):
+        query1 = {
+            'size': 1000,
+            'sort': {
+                'timestamp': {
+                    "order": "desc"
+                }
+            },
+            "query": {
+                "match_phrase": {
+                    "short_message": "user add course"
+                }
+            }
         }
-        resp = requests.post(self.url + '/query.json', cookies=self.cookies, json=req)
-        resp.raise_for_status()
-        if resp.json()['queryState'] != 'COMPLETED':
-            raise DrillQueryException('Query is not COMPLETED. query:' + query + ' query status is ' + resp.json()['queryState'])
-        return DrillQueryResult(resp.json())
+        query2 = {
+            'size': 1000,
+            'sort': {
+                'timestamp': {
+                    "order": "desc"
+                }
+            },
+            "query": {
+                "match_phrase": {
+                    "message": "user add course"
+                }
+            }
+        }
+        for e in self.find_scrolling(query1, "cgr-clientlogging"):
+            s = e['_source']
+            yield {'study_program': s['a_studyProgram'], 'course_id': s['a_courseNo'], 'device_id': s['device_id'], 'raw': e}
+        for e in self.find_scrolling(query2, "cgr-legacy"):
+            s = e['_source']
+            yield {'study_program': s['a_studyProgram'], 'course_id': s['a_courseNo'], 'device_id': s['device_id'], 'raw': e}
+
+    def find_scrolling(self, query, index):
+        res = self.client.search(index=index, body=query, params={'scroll': '10m'})
+        scroll_id = res['_scroll_id']
+        while len(res['hits']['hits']) > 0:
+            for hit in res['hits']['hits']:
+                yield hit
+            res = self.client.scroll(scroll_id=scroll_id, scroll='10m')
+        self.client.clear_scroll(scroll_id=scroll_id)
 
 
 class MongoService:

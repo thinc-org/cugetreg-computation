@@ -4,3 +4,4 @@ requests
 scipy
 sklearn
 pymongo
+opensearch-py==2.0.1

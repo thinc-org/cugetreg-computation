@@ -4,23 +4,6 @@ from unittest.mock import patch, MagicMock
 from pymongo import MongoClient
 
 
-@unittest.skip('Skipped, Requires external connection')
-class DrillClientTest(unittest.TestCase):
-
-    def setUp(self):
-        self.client = DrillClient()
-
-    def test_check_status(self):
-        self.client.checkstatus()
-
-    def test_query(self):
-        res = self.client.query("SELECT 'test' as msg")
-        self.assertEqual(res.rows[0]['msg'], 'test')
-
-    def test_error_query(self):
-        self.assertRaises(DrillQueryException, lambda : self.client.query("syntax error query"))
-
-
 class MongoServiceTest(unittest.TestCase):
     
     db = {
