@@ -78,7 +78,7 @@ class CourseRecommendationModel:
             cnt += 1
             if cnt % 10000 == 0:
                 self.logger.info("Downloaded {} observations".format(cnt))
-            if cnt > 10000:
+            if cnt > 1000000:
                  break
         self.logger.info('Received {} observations'.format(cnt))
         obsv = [l for _, l in obsv.items() if len(l) > 4]
