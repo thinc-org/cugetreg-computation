@@ -52,21 +52,4 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-      - name: Connect SSLVPN
-        uses: thinc-org/openfortivpn-action@master
-        with:
-          host: ${{ secrets.SSLVPN_HOST }}
-          username: ${{ secrets.SSLVPN_USERNAME }}
-          password: ${{ secrets.SSLVPN_PASSWORD }}
-          trustedCert: ${{ secrets.SSLVPN_TRUSTED_CERT }}
-
-      - name: Deploy to VM
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            docker pull ghcr.io/thinc-org/cugetreg-computation:latest
-            docker-compose up -d 
+ 

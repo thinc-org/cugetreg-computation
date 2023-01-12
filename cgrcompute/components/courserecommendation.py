@@ -1,11 +1,12 @@
 from scipy.sparse import lil_matrix
 from sklearn.metrics.pairwise import cosine_similarity
-from cgrcompute.components.external import DrillClient, get_mongo_service
+from cgrcompute.components.external import ElasticService, get_mongo_service
 from typing import Hashable
 from logging import getLogger
 from cgrcompute.grpc import cgrcompute_pb2 as grpcmsg
 from cgrcompute.components.multiprocess import SharableCache
 import random
+import time
 
 class CosineSimRecommendationModel:
 
@@ -44,47 +45,42 @@ class CosineSimRecommendationModel:
         return dict(sorted(d.items(), key=lambda x: x[1])[-300:])
 
 class CourseRecommendationModel:
-
-    # This query looks weird but it's hand-optimized.
-    OBSV_QUERY = """
-            select `a_courseNo`, `a_studyProgram`, `device_id`
-            from
-            (
-            select `message`, `a_courseNo`, `a_studyProgram`, `device_id`
-            from (select `message`, `a_courseNo`, `a_studyProgram`, `device_id`
-            from elastic.`graylog_0`
-            where `a_courseNo` <> 'null'
-            order by `timestamp` desc
-            )
-            where `message` like 'user add course'
-            limit 3000000
-            )
-            """
     
     def __init__(self):
         self.model = None
         self.logger = getLogger('CourseRecommendationModel')
 
-    def populate(self, drill: DrillClient):
-        obsv = self.downloadobsvdata(drill)
+    def populate(self):
+        self.logger.info("Started download {}".format(time.time()))
+        obsv = self.downloadobsvdata()
+        self.logger.info("Download completed {}. Start training".format(time.time()))
         self.model = CosineSimRecommendationModel.train(obsv)
+        self.logger.info("Training completed {}".format(time.time()))
 
     def infer(self, selected_courses):
         res = self.model.infer(selected_courses)
         res = sorted(res.items(), key=lambda x:-x[1])
         return [course for course, score in res][:300]
     
-    def downloadobsvdata(self, drill: DrillClient):
+    def downloadobsvdata(self):
         self.logger.info('Download observation')
-        data = drill.query(self.OBSV_QUERY)
-        self.logger.info('Received {} observations'.format(len(data.rows)))
+        es = ElasticService()
+        cnt = 0
         obsv = dict()
-        for e in data.rows:
-            el = (e['a_studyProgram'], e['a_courseNo'])
+        for e in es.find_all_user_add_course():
+            course_key = (e['study_program'], e['course_id'])
+            grouping = e['device_id']
             try:
-                obsv[e['device_id']].add(el)
+                obsv[grouping].add(course_key)
             except KeyError:
-                obsv[e['device_id']] = set([el])
+                obsv[grouping] = set([course_key]) 
+
+            cnt += 1
+            if cnt % 10000 == 0:
+                self.logger.info("Downloaded {} observations".format(cnt))
+            if cnt > 10000:
+                 break
+        self.logger.info('Received {} observations'.format(cnt))
         obsv = [l for _, l in obsv.items() if len(l) > 4]
         self.logger.info('Retrieved {} qualified observation'.format(len(obsv)))
         return obsv
@@ -94,12 +90,11 @@ class CourseRecommendationModel:
 
 def get_course_recommendation_model():
     model = CourseRecommendationModel()
-    model.populate(DrillClient())
+    model.populate()
     return model
 
 def recommend_course(req: grpcmsg.CourseRecommendationRequest, cache: SharableCache) -> grpcmsg.CourseRecommendationResponse:
     logger = getLogger('recommend_course')
-    logger.info('Processing recommendation for {}'.format(req))
     model: CourseRecommendationModel = cache.get_or_create('recommend_course_model', get_course_recommendation_model)
     res = []
     if req.variant == 'RANDOM':
