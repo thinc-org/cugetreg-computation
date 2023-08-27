@@ -51,9 +51,12 @@ def create_client():
 
 if __name__ == '__main__':
     logger = getLogger('main')
-    logger.info("Starting CGR-Compute")
+    logger.info("Started CGR-Compute with gRPC at :50051")
     server = create_server()
     server.start()
-    server.wait_for_termination()
-    manager.shutdown()
-    pool.shutdown()
+    try:
+        server.wait_for_termination()
+    finally:
+        logger.info("Shutting down...")
+        manager.shutdown()
+        pool.shutdown()
