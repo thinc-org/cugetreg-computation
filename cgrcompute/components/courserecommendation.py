@@ -27,7 +27,7 @@ class CosineSimRecommendationModel:
             neigh = []
             for c in sim.getrow(i).nonzero()[1]:
                 neigh.append((items[c], sim[i, c]))
-            neigh = sorted(neigh, key=lambda x: x[1])[-300:]
+            neigh = sorted(neigh, key=lambda x: x[1])[-100:]
             ccmtx[cid] = dict(neigh)
         return CosineSimRecommendationModel(ccmtx)
 
@@ -42,7 +42,7 @@ class CosineSimRecommendationModel:
                     d[pcid] += scr
             except KeyError:
                 pass
-        return dict(sorted(d.items(), key=lambda x: x[1])[-300:])
+        return dict(sorted(d.items(), key=lambda x: x[1])[-100:])
 
 class CourseRecommendationModel:
     
@@ -60,7 +60,7 @@ class CourseRecommendationModel:
     def infer(self, selected_courses):
         res = self.model.infer(selected_courses)
         res = sorted(res.items(), key=lambda x:-x[1])
-        return [course for course, score in res][:300]
+        return [course for course, score in res][:100]
     
     def downloadobsvdata(self, es: ElasticService):
         self.logger.info('Download observation')
@@ -77,7 +77,7 @@ class CourseRecommendationModel:
             cnt += 1
             if cnt % 10000 == 0:
                 self.logger.info("Downloaded {} observations".format(cnt))
-            if cnt >= 900000:
+            if cnt >= 100000:
                  break
         self.logger.info('Received {} observations'.format(cnt))
         obsv = [l for _, l in obsv.items() if len(l) > 4]
