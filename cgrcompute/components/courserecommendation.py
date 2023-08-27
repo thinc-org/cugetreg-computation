@@ -52,7 +52,7 @@ class CourseRecommendationModel:
 
     def populate(self):
         self.logger.info("Started download {}".format(time.time()))
-        obsv = self.downloadobsvdata()
+        obsv = self.downloadobsvdata(ElasticService())
         self.logger.info("Download completed {}. Start training".format(time.time()))
         self.model = CosineSimRecommendationModel.train(obsv)
         self.logger.info("Training completed {}".format(time.time()))
@@ -62,9 +62,8 @@ class CourseRecommendationModel:
         res = sorted(res.items(), key=lambda x:-x[1])
         return [course for course, score in res][:300]
     
-    def downloadobsvdata(self):
+    def downloadobsvdata(self, es: ElasticService):
         self.logger.info('Download observation')
-        es = ElasticService()
         cnt = 0
         obsv = dict()
         for e in es.find_all_user_add_course():
@@ -73,7 +72,7 @@ class CourseRecommendationModel:
             try:
                 obsv[grouping].add(course_key)
             except KeyError:
-                obsv[grouping] = set([course_key]) 
+                obsv[grouping] = set([course_key])
 
             cnt += 1
             if cnt % 10000 == 0:

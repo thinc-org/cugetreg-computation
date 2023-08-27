@@ -1,7 +1,6 @@
 import unittest
-from cgrcompute.components.external import DrillClient, DrillQueryException, MongoService
+from cgrcompute.components.external import MongoService
 from unittest.mock import patch, MagicMock
-from pymongo import MongoClient
 
 
 class MongoServiceTest(unittest.TestCase):

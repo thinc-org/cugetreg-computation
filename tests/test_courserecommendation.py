@@ -49,21 +49,6 @@ class CosineSimRecommendationModelTest(unittest.TestCase):
 
 class CourseRecommendationModelTest(unittest.TestCase):
 
-    def mockdrill(self):
-        drillres = MagicMock()
-        drillres.rows = [
-                    {
-                        'a_studyProgram': 'S',
-                        'a_courseNo': str(i),
-                        'device_id': str(j)
-                    }
-                    for j in range(3)
-                    for i in range(5)
-                ]
-        drill = MagicMock()
-        drill.query = MagicMock(return_value=drillres)
-        return drill
-
     def with_mocked_internalmodel(self, infer_result):
         model = CourseRecommendationModel()
         model.model = CosineSimRecommendationModel({})
@@ -71,12 +56,19 @@ class CourseRecommendationModelTest(unittest.TestCase):
         return model
 
     def test_downloadobsvdata(self):
-        drill = self.mockdrill()
+
+        def mock_es() -> ElasticService:
+            mock = MagicMock()
+            mock.find_all_user_add_course.return_value = [
+                {'study_program': 'S', 'course_id': course_no, 'device_id': dev_id}
+                for course_no in ['21101', '21102', '21103', '21104', '21105']
+                for dev_id in ['1', '2', '3']
+            ]
+            return mock
         model = CourseRecommendationModel()
-        res = model.downloadobsvdata(drill)
-        drill.query.assert_called_with(model.OBSV_QUERY)
+        res = model.downloadobsvdata(mock_es())
         self.assertEqual(3, len(res))
-        expectedSet = set(('S', str(i)) for i in range(5))
+        expectedSet = set(('S', course_no) for course_no in ['21101', '21102', '21103', '21104', '21105'])
         for s in res:
             self.assertSetEqual(expectedSet, s)
 
